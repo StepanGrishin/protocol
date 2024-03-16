@@ -1,0 +1,171 @@
+func address(of object: UnsafeRawPointer) -> String {
+    let addr = Int(bitPattern: object)
+    return String(describing: addr)
+}
+
+func address(off value: AnyObject) -> String {
+    return "\(Unmanaged.passUnretained(value).toOpaque()))"
+}
+
+// Стуктура IOSCollection
+struct IOSCollection<T> {
+    private var elements: [T]
+
+    init(_ elements: [T] = []) {
+        self.elements = elements
+    }
+
+    var count: Int {
+        elements.count
+    }
+
+    mutating func append(_ element: T) {
+        elements.append(element)
+    }
+
+    subscript(index: Int) -> T? {
+        guard index >= 0, index < elements.count else {
+            return nil
+        }
+        return elements[index]
+    }
+}
+
+var collection1 = IOSCollection([1, 2, 3])
+var collection2 = IOSCollection(["a", "b", "c"])
+
+print("Address of collection1: \(address(of: &collection1))")
+print("Address of collection2: \(address(of: &collection2))")
+
+// Протокол Hotel
+protocol Hotel {
+    init(roomCount: Int)
+}
+
+// Класс HotelAlfa, подписанный на протокол Hotel
+class HotelAlfa: Hotel {
+    var roomCount: Int
+    
+    required init(roomCount: Int) {
+        self.roomCount = roomCount
+    }
+}
+
+let alfaHotel = HotelAlfa(roomCount: 69)
+print("Alfa Hotel Room Count: \(alfaHotel.roomCount)")
+
+// Протокол GameDice
+protocol GameDice {
+    var numberDice: Int { get }
+}
+
+// Расширение типа Int для соответствия протоколу GameDice
+extension Int: GameDice {
+    var numberDice: Int {
+        print("\nВыпало \(self) на кубике")
+        return self
+    }
+}
+
+let diceCoub = 4
+diceCoub.numberDice 
+
+// Протокол
+protocol MyProtocol {
+    func myMethod()
+    var mandatoryProperty: Int { get }
+    var optionalProperty: String? { get set }
+}
+
+// Класс MyClass, подписанный на протокол
+class MyClass: MyProtocol {
+    var mandatoryProperty: Int
+    var optionalProperty: String?  
+    
+    init(mandatoryProperty: Int) {
+        self.mandatoryProperty = mandatoryProperty
+        self.optionalProperty = nil
+    }
+    
+    // Реализация обязательного метода из протокола
+    func myMethod() {
+        print("Выполнение метода")
+    }
+}
+
+let myObject = MyClass(mandatoryProperty: 42)
+myObject.myMethod()
+print("\nОбязательное свойство: \(myObject.mandatoryProperty)")
+
+// Присвоение значения optionalProperty (явно optional свойство)
+myObject.optionalProperty = "Опциональное значение"
+print("Опциональное свойство: \(myObject.optionalProperty ?? "Нет значения")")
+
+
+// Протокол для разработки кода
+protocol CodeDevelopment {
+    var startTime: String { get set }
+    var codeLines: Int { get set }
+    
+    func writeCode(platform: Platform, numberOfSpecialist: Int)
+}
+
+// Протокол для завершения работы с кодом
+protocol CodeCompletion {
+    func stopCoding()
+}
+
+// Перечисление для платформы
+enum Platform {
+    case ios
+    case android
+    case web
+}
+
+// Класс Компания
+class Company: CodeDevelopment, CodeCompletion {
+    var numberOfProgrammers: Int
+    var specializations: [Platform]
+    
+    var startTime: String = ""
+    var codeLines: Int = 0
+    
+    init(numberOfProgrammers: Int, specializations: [Platform]) {
+        self.numberOfProgrammers = numberOfProgrammers
+        self.specializations = specializations
+    }
+    
+    // Реализация метода протокола CodeDevelopment
+    func writeCode(platform: Platform, numberOfSpecialist: Int) {
+        if specializations.contains(platform) && numberOfSpecialist <= numberOfProgrammers {
+            startTime = getCurrentTime()
+            codeLines += numberOfSpecialist * 100  // Просто для примера, вы можете использовать другую логику
+            print("Разработка началась. Пишем код для \(platform).")
+        } else {
+            print("Ошибка: Некорректные параметры для разработки.")
+        }
+    }
+    
+    // Реализация метода протокола CodeCompletion
+    func stopCoding() {
+        if startTime.isEmpty {
+            print("Ошибка: Разработка еще не начата.")
+        } else {
+            print("Работа закончена. Сдаю в тестирование. Время начала: \(startTime), количество кода: \(codeLines) строк.")
+        }
+    }
+    
+    private func getCurrentTime() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm:ss"
+        return formatter.string(from: Date())
+    }
+}
+
+let company = Company(numberOfProgrammers: 10, specializations: [.ios, .android, .web])
+
+company.writeCode(platform: .ios, numberOfSpecialist: 5)
+company.stopCoding()
+
+company.writeCode(platform: .android, numberOfSpecialist: 12)
+company.stopCoding()
